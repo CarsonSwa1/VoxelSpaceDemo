@@ -1,0 +1,28 @@
+html,body{
+    margin: 0;
+    padding: 0;
+}
+
+*, *::before, *::after{ 
+    margin: 0; 
+    padding: 0; 
+}
+
+h3{
+    color: red;
+}
+
+ul{ 
+    list-style-type: disc;
+    padding-left: 40px !important;
+}
+
+.container{
+    background-color: rgb(47, 44, 44);
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+}
