@@ -19,14 +19,17 @@ async function delayTwoSeconds() {
 document.addEventListener("DOMContentLoaded",async function load(){
     setCanvas();
     wasmBytes = await loadWasmFile("../wasm/render.wasm")
-    gm.wasm = initWasm(wasmBytes, 50);
+    gm.wasm = initWasm(wasmBytes, 4);
+    console.log(gm.wasm.exports.get_pages())
     
     maps.wasm = gm.wasm;
     await maps.loadMap(colorMapPath,Maps.MAP_TYPES.COLOR);
     await maps.loadMap(depthMapPath,Maps.MAP_TYPES.DEPTH);
     console.log(maps.map);
+    console.log(gm.wasm.exports.get_pages())
 
-
+    gm.loadCanvasBufIntoWasm();
+    
 
     // console.log(gm.wasm.exports.heap_base())
     // console.log(gm.wasm.memory);
@@ -66,10 +69,17 @@ function initWasm(wasm_bytes, num_pages){
     const mod = new WebAssembly.Module(wasm_bytes);
     const memory = new WebAssembly.Memory({initial: num_pages});
     const imports = {env: {
-        memory: memory,
+        memory,
+        js__realign: realignWasmData,
     },}
     const instance = new WebAssembly.Instance(mod,imports);
     instance.memory = memory;
     return instance
 }
 
+//this gets called from wasm if we grow the size of the buffer.
+function realignWasmData(){
+    if(maps.byteOffset != null && gm.wasm != null){
+        maps.map = new Uint8ClampedArray(gm.wasm.memory.buffer,maps.byteOffset,maps.width*maps.height*maps.depth);
+    }
+}

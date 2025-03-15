@@ -9,8 +9,10 @@ export default class GameManager{
         this.keys.fill(false);
 
         this.ctx = ctx;
-        this.screen = new ImageData(ctx.canvas.width,ctx.canvas.height);
+        this.canvasBuf = new ImageData(ctx.canvas.width,ctx.canvas.height);
+        this.canvasBufOffset = null;
         this.wasm = null;
+        
 
         this.setEventListeners();
         this.setIntervals();
@@ -56,8 +58,21 @@ export default class GameManager{
 
     canvasResize(){
         console.log(this.ctx.canvas.width);
-        this.screen = new ImageData(this.ctx.canvas.width,this.ctx.canvas.height);
+        this.canvasBuf = new ImageData(this.ctx.canvas.width,this.ctx.canvas.height);
     }
+
+    loadCanvasBufIntoWasm(){
+        const arrSize = this.ctx.canvas.height * this.ctx.canvas.width * 4;
+        this.canvasBufOffset = this.wasm.exports.mallocate(arrSize);
+        this.canvasBuf = new ImageData(
+            new Uint8ClampedArray(this.wasm.memory.buffer,this.canvasBufOffset,arrSize),
+            this.ctx.canvas.width,
+            this.ctx.canvas.height,
+        );
+    }
+    
+
+
 }
 
 
