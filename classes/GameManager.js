@@ -10,10 +10,12 @@ export default class GameManager{
 
         this.ctx = ctx;
         this.screen = new ImageData(ctx.canvas.width,ctx.canvas.height);
+        this.wasm = null;
 
         this.setEventListeners();
         this.setIntervals();
     }
+
 
     setEventListeners(){
         this.keyPress = (e) => {

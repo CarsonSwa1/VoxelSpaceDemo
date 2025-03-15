@@ -1,1 +1,3 @@
 web-components/tests/
+wasm/test/
+.vscode/

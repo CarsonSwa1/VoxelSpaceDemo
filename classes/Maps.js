@@ -17,9 +17,13 @@ export default class Maps{
         DEPTH: 1,
     }
     
-    constructor(){
-        this.colorMap = null;
-        this.depthMap = null;
+    constructor(depth=4){
+        this.map = new Uint8ClampedArray();
+        this.width = 0;
+        this.height = 0;
+        this.depth = depth;
+        this.wasm = null;
+        this.byteOffset = null;
     }
 
     async loadMap(imgPath, mapType){
@@ -30,11 +34,50 @@ export default class Maps{
         c.height = img.height;
         ctx.drawImage(img,0,0)
         if (mapType === Maps.MAP_TYPES.COLOR){
-            this.colorMap = ctx.getImageData(0,0,c.width,c.height);
+            const colorMap = ctx.getImageData(0,0,c.width,c.height);
+            this.loadColor(colorMap);
         }
         else if (mapType === Maps.MAP_TYPES.DEPTH){
-            this.depthMap = ctx.getImageData(0,0,c.width,c.height);
+            const depthMap = ctx.getImageData(0,0,c.width,c.height);
+            this.loadDepth(depthMap);
         }
+    }
+
+    loadColor(colorMap){
+        if (this.map.length == 0){
+            this.width = colorMap.width;
+            this.height = colorMap.height;
+            const arrLen = this.width * this.height * this.depth;
+            this.byteOffset = this.wasm.exports.mallocate(arrLen);
+            this.map = new Uint8ClampedArray(this.wasm.memory.buffer,this.byteOffset,arrLen);
+        }
+
+        for(let y = 0; y < this.height;y++){
+            for(let x = 0; x < this.width;x++){
+                const idx = y * this.width * 4 + x * 4;
+                this.map[idx + 0] = colorMap.data[idx + 0];
+                this.map[idx + 1] = colorMap.data[idx + 1];
+                this.map[idx + 2] = colorMap.data[idx + 2];
+            }
+        }
+        console.log("Color Map Loaded")
+    }
+
+    loadDepth(depthMap){
+        if (this.map.length == 0){
+            this.width = depthMap.width;
+            this.height = depthMap.height;
+            const arrLen = this.width * this.height * this.depth;
+            this.byteOffset = this.wasm.exports.mallocate(arrLen);
+            this.map = new Uint8ClampedArray(this.wasm.memory.buffer,this.byteOffset,arrLen);
+        }
+        for(let y = 0; y < this.height;y++){
+            for(let x = 0; x < this.width;x++){
+                const idx = y * this.width * 4 + x * 4;
+                this.map[idx + 3] = depthMap.data[idx];
+            }
+        }
+        console.log("Depth Map Loaded")
     }
 
 }
