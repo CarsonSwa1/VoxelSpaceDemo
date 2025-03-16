@@ -12,10 +12,9 @@ export default class GameManager{
         this.canvasBuf = new ImageData(ctx.canvas.width,ctx.canvas.height);
         this.canvasBufOffset = null;
         this.wasm = null;
-        
 
-        this.setEventListeners();
-        this.setIntervals();
+        // this.setEventListeners();
+        // this.setIntervals();
     }
 
 
@@ -39,26 +38,43 @@ export default class GameManager{
     }
     
     movePlayer(){
-        if (this.keys[0])
+        if (this.keys[0]){
             this.pX -= 1;
-        if (this.keys[1])
+            this.wasm.exports.move_player(0);
+        }
+        if (this.keys[1]){
             this.pX += 1;
-        if (this.keys[2])
+            this.wasm.exports.move_player(1);
+        }
+        if (this.keys[2]){
             this.pY -= 1;
-        if (this.keys[3])
+            this.wasm.exports.move_player(2);
+        }
+        if (this.keys[3]){
             this.pY += 1;
+            this.wasm.exports.move_player(3);
+        }
     }
 
     render(){
-        this.ctx.fillStyle = 'grey';
-        this.ctx.fillRect(0,0,this.ctx.canvas.width,this.ctx.canvas.height);
-        this.ctx.fillStyle = 'white';
-        this.ctx.fillRect(this.pX,this.pY,10,10);
+        // this.ctx.fillStyle = 'grey';
+        // this.ctx.fillRect(0,0,this.ctx.canvas.width,this.ctx.canvas.height);
+        // this.ctx.fillStyle = 'white';
+        // this.ctx.fillRect(this.pX,this.pY,10,10);
+        this.wasm.exports.render();
+        this.ctx.putImageData(this.canvasBuf,0,0);
     }
 
     canvasResize(){
-        console.log(this.ctx.canvas.width);
-        this.canvasBuf = new ImageData(this.ctx.canvas.width,this.ctx.canvas.height);
+        const arrSize = this.ctx.canvas.height * this.ctx.canvas.width * 4;
+        this.wasm.exports.reallocate(this.canvasBufOffset,arrSize);
+        this.canvasBuf = new ImageData(
+            new Uint8ClampedArray(this.wasm.memory.buffer,this.canvasBufOffset,arrSize),
+            this.ctx.canvas.width,
+            this.ctx.canvas.height,
+        );
+        this.wasm.exports.set_canvas(this.ctx.canvas.width,this.ctx.canvas.height,4,this.canvasBufOffset);
+        console.log(this.wasm.exports.get_pages())
     }
 
     loadCanvasBufIntoWasm(){
@@ -69,6 +85,7 @@ export default class GameManager{
             this.ctx.canvas.width,
             this.ctx.canvas.height,
         );
+        this.wasm.exports.set_canvas(this.ctx.canvas.width,this.ctx.canvas.height,4,this.canvasBufOffset);
     }
     
 

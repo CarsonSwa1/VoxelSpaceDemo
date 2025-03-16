@@ -17,7 +17,6 @@ async function delayTwoSeconds() {
 }
 
 document.addEventListener("DOMContentLoaded",async function load(){
-    setCanvas();
     wasmBytes = await loadWasmFile("../wasm/render.wasm")
     gm.wasm = initWasm(wasmBytes, 4);
     console.log(gm.wasm.exports.get_pages())
@@ -28,7 +27,11 @@ document.addEventListener("DOMContentLoaded",async function load(){
     console.log(maps.map);
     console.log(gm.wasm.exports.get_pages())
 
+    setCanvas();
     gm.loadCanvasBufIntoWasm();
+
+    gm.setEventListeners();
+    gm.setIntervals();
     
 
     // console.log(gm.wasm.exports.heap_base())
@@ -49,7 +52,10 @@ document.addEventListener("DOMContentLoaded",async function load(){
 })
 
 window.addEventListener("resize",() => {
-    setCanvas();
+    canvas.width = window.innerWidth * .4;
+    canvas.height = window.innerHeight * .5;
+    gm.canvasResize();
+    gm.render();
 })
 
 

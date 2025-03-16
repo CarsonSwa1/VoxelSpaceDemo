@@ -50,6 +50,7 @@ export default class Maps{
             const arrLen = this.width * this.height * this.depth;
             this.byteOffset = this.wasm.exports.mallocate(arrLen);
             this.map = new Uint8ClampedArray(this.wasm.memory.buffer,this.byteOffset,arrLen);
+            this.wasm.exports.set_img(this.width,this.height,this.depth,this.byteOffset);
         }
 
         for(let y = 0; y < this.height;y++){
@@ -70,6 +71,7 @@ export default class Maps{
             const arrLen = this.width * this.height * this.depth;
             this.byteOffset = this.wasm.exports.mallocate(arrLen);
             this.map = new Uint8ClampedArray(this.wasm.memory.buffer,this.byteOffset,arrLen);
+            this.wasm.exports.set_img(this.width,this.height,this.depth,this.byteOffset);
         }
         for(let y = 0; y < this.height;y++){
             for(let x = 0; x < this.width;x++){
