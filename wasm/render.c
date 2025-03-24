@@ -11,12 +11,14 @@ extern u8 __data_end;
 
 u8* heap_top_ptr = &__heap_base;
 
+
 //Game Variables
 int px = 0;
 int py = 0;
 float pa = 0.;
 float pdx = 0.;
 float pdy = 0.;
+int render_distance = 100;
 
 //Canvas Variables
 u8* canvas;
@@ -33,6 +35,19 @@ int img_depth = 0;
 
 __attribute__((import_module("env"), import_name("js__realign")))
 void js_realign();
+
+__attribute__((import_module("env"), import_name("js__sin")))
+void js_sin();
+
+__attribute__((import_module("env"), import_name("js__cos")))
+void js_cos();
+
+
+//prototypes
+int abs(int x);
+// float fabs(float x);
+void plotLine(int x0,int y0,int x1,int y1, int color);
+
 
 
 void* WASM_EXPORT(mallocate)(int bytes){
@@ -112,10 +127,43 @@ void WASM_EXPORT(render)(){
             canvas[idx + 3] = 255;
         }
     }
-    
+    plotLine(0,0,100,50,0xFF000000);
 }
 
 
+void plotLine(int x0,int y0,int x1,int y1, int color){
+    int dx = abs(x1 - x0);
+    int sx = (x0 < x1) ? 1 : -1;
+    int dy = -abs(y1-y0);
+    int sy = (y0 < y1) ? 1 : -1;
+    int error = dx + dy;
+    while (1==1){
+        int idx = (y0 * canvas_width * canvas_depth + x0 * canvas_depth) >> 2;
+        ((int*)canvas)[idx] = color;
+        //((int*)canvas)[idx] = color;
+        int e2 = 2 * error;
+        if (e2 >= dy){
+            if (x0 == x1)
+                break;
+            error = error + dy;
+            x0 = x0 + sx;
+        } 
+        if (e2 <= dx){
+            if (y0 == y1)
+                break;
+            error = error + dx;
+            y0 = y0 + sy;
+        }
+    }
+}
+
+int abs(int x){
+    return (x >= 0) ? x : -x;
+}
+
+// float fabs(float x){
+//     return (x >= 0) ? x : -x;
+// }
 
 
 
