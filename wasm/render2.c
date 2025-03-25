@@ -1,9 +1,10 @@
 #include <emscripten.h>
+#include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 
 //Prototypes
 void plotLine(int x0,int y0,int x1,int y1, int color);
+void console_log(char* str);
 
 //Game Variables
 int px = 0;
@@ -55,13 +56,33 @@ void EMSCRIPTEN_KEEPALIVE set_canvas(int width, int height, int depth,int ptr){
     canvas_height = height;
     canvas_depth = depth;
     canvas = (uint8_t*)ptr;
+    // char buf[50];
+    // sprintf(buf, "Hello World! %d\n", 123);
+    // console_log(buf);
 }
 
 void EMSCRIPTEN_KEEPALIVE render(){
-    int arr_len = (canvas_width * canvas_height * canvas_depth) >> 2;
-    for(int i = 0; i < arr_len;i++){
-        ((int*)canvas)[i] = 0xAFFFFFFF;
+    // int arr_len = (canvas_width * canvas_height * canvas_depth) >> 2;
+    // for(int i = 0; i < arr_len;i++){
+    //     ((int*)canvas)[i] = ((int*)map)[i];
+    // }
+
+    float x_step = (float)map_width / (float)canvas_width ;
+    float y_step = (float)map_height / (float)canvas_height;
+    float map_y = 0.0;
+    int alpha = 0xFF808080;
+
+
+    for (int y = 0; y < canvas_height;y++){
+        float map_x = 0.0;
+        for (int x = 0; x < canvas_width;x++){
+            *(int*)(canvas + (y * canvas_width + x) * 4) = (*(int*)(map + (((int)map_y) * map_width + (((int)map_x))) * 4)) | alpha;
+            map_x += x_step; 
+        }
+        map_y += y_step;
     }
+    
+    //0xAFFFFFFF;
 
     for (int x = px; x < px + 10;x++){
         for (int y = py;y < py + 10;y++){

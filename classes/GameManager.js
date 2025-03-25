@@ -56,9 +56,12 @@ export default class GameManager{
         // this.ctx.fillStyle = 'white';
         // this.ctx.fillRect(this.pX,this.pY,10,10);
         
+        var performance = window.performance;
+        var t0 = performance.now();
         this.wasm.exports.render();
         this.ctx.putImageData(this.wasmBuf.data,0,0);
-
+        var t1 = performance.now();
+        console.log("Call to doWork took " + (t1 - t0) + " milliseconds.")
     }
 
     canvasResize(){

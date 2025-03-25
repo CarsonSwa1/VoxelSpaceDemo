@@ -1,3 +1,5 @@
+import WasmArray from "../classes/WasmArray.js";
+
 export default class Maps{
     static async loadImage(imgPath){
         return new Promise((resolve,reject) => {
@@ -18,12 +20,17 @@ export default class Maps{
     }
     
     constructor(depth=4){
-        this.map = new Uint8ClampedArray();
+        this.map = null;
         this.width = 0;
         this.height = 0;
         this.depth = depth;
-        this.wasm = null;
-        this.byteOffset = null;
+        this.wasm = {exports: null, memory: null, wasm_data: null}
+    }
+
+    setWasm(exports, memory, wasm_data){
+        this.wasm.exports = exports;
+        this.wasm.memory = memory;
+        this.wasm.wasm_data = wasm_data;
     }
 
     async loadMap(imgPath, mapType){
@@ -44,42 +51,40 @@ export default class Maps{
     }
 
     loadColor(colorMap){
-        if (this.map.length == 0){
-            this.width = colorMap.width;
-            this.height = colorMap.height;
-            const arrLen = this.width * this.height * this.depth;
-            this.byteOffset = this.wasm.exports.mallocate(arrLen);
-            this.map = new Uint8ClampedArray(this.wasm.memory.buffer,this.byteOffset,arrLen);
-            this.wasm.exports.set_img(this.width,this.height,this.depth,this.byteOffset);
-        }
-
+        if (this.map == null)
+            this.makeMap(colorMap.width,colorMap.height);
         for(let y = 0; y < this.height;y++){
             for(let x = 0; x < this.width;x++){
                 const idx = y * this.width * 4 + x * 4;
-                this.map[idx + 0] = colorMap.data[idx + 0];
-                this.map[idx + 1] = colorMap.data[idx + 1];
-                this.map[idx + 2] = colorMap.data[idx + 2];
+                this.map.data[idx + 0] = colorMap.data[idx + 0];
+                this.map.data[idx + 1] = colorMap.data[idx + 1];
+                this.map.data[idx + 2] = colorMap.data[idx + 2];
             }
         }
         console.log("Color Map Loaded")
     }
 
     loadDepth(depthMap){
-        if (this.map.length == 0){
-            this.width = depthMap.width;
-            this.height = depthMap.height;
-            const arrLen = this.width * this.height * this.depth;
-            this.byteOffset = this.wasm.exports.mallocate(arrLen);
-            this.map = new Uint8ClampedArray(this.wasm.memory.buffer,this.byteOffset,arrLen);
-            this.wasm.exports.set_img(this.width,this.height,this.depth,this.byteOffset);
-        }
+        if (this.map == null)
+            this.makeMap(depthMap.width,depthMap.height);
         for(let y = 0; y < this.height;y++){
             for(let x = 0; x < this.width;x++){
                 const idx = y * this.width * 4 + x * 4;
-                this.map[idx + 3] = depthMap.data[idx];
+                this.map.data[idx + 3] = depthMap.data[idx];
             }
         }
         console.log("Depth Map Loaded")
+    }
+
+    makeMap(width,height){
+        this.width = width;
+        this.height = height;
+        const arrLen = this.width * this.height * this.depth;
+        const byteOffset = this.wasm.exports.wasmmalloc(arrLen);
+        const map = new Uint8ClampedArray(this.wasm.memory.buffer,byteOffset,arrLen);
+        this.map = new WasmArray(map,byteOffset,arrLen);
+        this.wasm.wasm_data.add(this.map);
+        this.wasm.exports.set_img(this.width,this.height,this.depth,byteOffset);
     }
 
 }

@@ -18,11 +18,16 @@ document.addEventListener("DOMContentLoaded",async function load(){
     memory = new WebAssembly.Memory({initial: 2, maximum: 256});
     wasm_data = new Set();
     exports = await loadWasm("../wasm/render.wasm",memory,wasm_data);
-    gm.setWasm(exports, memory, wasm_data);
     console.log(exports)
+
+    //load map into wasm
+    maps.setWasm(exports,memory,wasm_data);
+    await maps.loadMap(colorMapPath,Maps.MAP_TYPES.COLOR);
+    await maps.loadMap(depthMapPath,Maps.MAP_TYPES.DEPTH);
 
     //load canvas buffer into wasm
     setCanvas();
+    gm.setWasm(exports, memory, wasm_data);
     gm.loadCanvasBufIntoWasm();
     gm.render();
 
@@ -70,6 +75,7 @@ async function loadWasm(filePath, memory, wasmData){
                 memory: memory,
                 emscripten_resize_heap: function(size){memory.grow(size);},
                 emscripten_notify_memory_growth: function(){fixWasmData(wasmData)},
+                js_console_log: wasmConsoleLog,
             }
         }
     ).then(results => {
@@ -85,5 +91,16 @@ function fixWasmData(wasmData){
     for(const data of wasmData){
         data.fix_buffer(memory.buffer);
     }
+}
+
+function wasmConsoleLog(char_ptr){
+    const arr = new Uint8ClampedArray(memory.buffer, char_ptr);
+    let str = "";
+    let i = 0;
+    while (arr[i] != 0){
+        str += String.fromCharCode(arr[i]);
+        i += 1;
+    }
+    console.log(str);
 }
 
