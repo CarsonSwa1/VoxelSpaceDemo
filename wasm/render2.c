@@ -1,18 +1,36 @@
 #include <emscripten.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+
+//constants
+#define PI 3.14159265358979323846
+#define TWO_PI 2 * PI
+#define PI_OVER_TWO .5 * PI
 
 //Prototypes
 void plotLine(int x0,int y0,int x1,int y1, int color);
+void fillRectCanvas(int x,int y,int w,int h, int color);
+int wrap(int num, int modul);
 void console_log(char* str);
+float js_sin(float angle);
+float js_cos(float angle);
+float js_tan(float angle);
+
+//Game Environment Variables
+int render_distance = 150;
+float vision_field = 0.785398; //45 degress in radians
+float tan_half_vision_field = 0.41421356237; //tangent of 22.5 degrees (used in rendering)
+float player_speed = 1.0;
+float rotation_speed = 0.05;
 
 //Game Variables
-int px = 0;
-int py = 0;
-int pdx = 0;
-int pdy = 0;
-int render_distance = 100;
-float pa = 0.0;
+float px = 50;
+float py = 50;
+float pa = PI_OVER_TWO;
+float pdx = 0.0;
+float pdy = 1.0;
+
 
 //Canvas Variables 
 uint8_t* canvas;
@@ -27,19 +45,25 @@ int map_height = 0;
 int map_depth = 0;
 
 
-void EMSCRIPTEN_KEEPALIVE move_player(uint8_t keyCode){
+void EMSCRIPTEN_KEEPALIVE move_player(uint8_t keyCode){    
     switch(keyCode){
         case 0: //Left Arrow
-            px -= 1;
+            pa -= rotation_speed;
+            pdx = js_cos(pa);
+            pdy = js_sin(pa);
             break;
         case 1: //Right Arrow
-            px += 1;
+            pa += rotation_speed;
+            pdx = js_cos(pa);
+            pdy = js_sin(pa);
             break;
-        case 2: 
-            py -= 1;
+        case 2: //Up Arrow
+            px += pdx * player_speed;
+            py += pdy * player_speed;
             break;
-        case 3: 
-            py += 1;
+        case 3: //Down Arrow
+            px -= pdx * player_speed;
+            py -= pdy * player_speed;
             break;
     }
 }
@@ -70,7 +94,7 @@ void EMSCRIPTEN_KEEPALIVE render(){
     float x_step = (float)map_width / (float)canvas_width ;
     float y_step = (float)map_height / (float)canvas_height;
     float map_y = 0.0;
-    int alpha = 0xFF808080;
+    int alpha = 0xFFB0B0B0;
 
 
     for (int y = 0; y < canvas_height;y++){
@@ -84,8 +108,8 @@ void EMSCRIPTEN_KEEPALIVE render(){
     
     //0xAFFFFFFF;
 
-    for (int x = px; x < px + 10;x++){
-        for (int y = py;y < py + 10;y++){
+    for (int x = (int)px; x < (int)px + 11;x++){
+        for (int y = (int)py;y < (int)py + 11;y++){
             int idx = y * canvas_width * 4 + x * 4;
             canvas[idx + 0] = 0;
             canvas[idx + 1] = 0;
@@ -93,10 +117,67 @@ void EMSCRIPTEN_KEEPALIVE render(){
             canvas[idx + 3] = 255;
         }
     }
-    plotLine(0,0,100,50,0xFF000000);
+    plotLine((int)(px + 5),(int)(py+5),(int)((px+5) + pdx * 50),(int)((py+5) + pdy * 50),0xFF000000);
 }
 
+void EMSCRIPTEN_KEEPALIVE render_voxel_space(){
+    fillRectCanvas(0,canvas_height -1, canvas_width,canvas_height,0xFFEDC482);
+    const float dist = tan_half_vision_field * render_distance;
+    const float col_step = canvas_width / (2 * dist);
+    float col = 0;
 
+    float point_x = px + pdx * render_distance;
+    float point_y = py + pdy * render_distance;
+
+    //we are getting perp vector so we swap pdx and pdy and make one negative
+    float perp_x = point_x + pdy * dist; //gets perpendicular vector to pdx,pdy line render_distance away
+    float perp_y = point_y - pdx * dist; 
+
+    //fillRectCanvas(0,canvas_height - 1, 100,100, 0xFF5500A1);
+    for(int j = 0; j < (int)(2 * dist + 1); j++){
+        float vx = (perp_x - px) / render_distance;
+        float vy = (perp_y - py) / render_distance;
+
+        float sx = px + vx;
+        float sy = py + vy;
+
+        int max_col_height = -1;
+        for(int i = 0; i < render_distance - 1;i++){
+            int idx = (wrap((int)sy,map_height) * map_width + wrap((int)sx,map_width)) * 4;
+            int distform = (int)((-75 + (map[idx+3])) / sqrt(pow(py - sy,2) + pow(px - sx,2)) * 250 + 255);
+            if (distform > max_col_height){
+                int color = 0xFF000000 | *((int*)(map + idx)); //get color with alpha channel to 255
+                int y = canvas_height - max_col_height - 1;
+                int w = ceil(col_step);
+                int h = (distform - max_col_height);
+                fillRectCanvas((int)col,y,w,h,color);
+                max_col_height = distform;
+            }
+            sx += vx;
+            sy += vy;
+        }
+        col += col_step;
+        perp_x -= pdy;
+        perp_y += pdx;
+    }
+    
+}
+
+void fillRectCanvas(int x,int y,int w,int h, int color){
+    for (int dx = 0; dx < w; dx++){
+        for(int dy = 0; dy < h;dy++){
+            int idx = (wrap(y-dy,canvas_height) * canvas_width + wrap(x + dx,canvas_width)) * 4;
+            *((int*)(canvas + idx)) = color;
+        }
+    }
+}   
+
+int wrap(int num, int modul){
+    int res = num % modul;
+    if (num < 0)
+        res += modul;
+    return res;
+}
 //Bresenham's Line algorithm
 void plotLine(int x0,int y0,int x1,int y1, int color){
     int dx = abs(x1 - x0);

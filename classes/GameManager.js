@@ -23,6 +23,7 @@ export default class GameManager{
         this.keyUnpress = (e) => {
             this.keys[getKeyCode(e.key)] = false;
         }
+        
 
         document.addEventListener('keydown',this.keyPress);
         document.addEventListener('keyup',this.keyUnpress);
@@ -51,17 +52,13 @@ export default class GameManager{
     }
 
     render(){
-        // this.ctx.fillStyle = 'grey';
-        // this.ctx.fillRect(0,0,this.ctx.canvas.width,this.ctx.canvas.height);
-        // this.ctx.fillStyle = 'white';
-        // this.ctx.fillRect(this.pX,this.pY,10,10);
-        
-        var performance = window.performance;
-        var t0 = performance.now();
-        this.wasm.exports.render();
+        // var performance = window.performance;
+        // var t0 = performance.now();
+        // this.wasm.exports.render();
+        this.wasm.exports.render_voxel_space();
         this.ctx.putImageData(this.wasmBuf.data,0,0);
-        var t1 = performance.now();
-        console.log("Call to doWork took " + (t1 - t0) + " milliseconds.")
+        // var t1 = performance.now();
+        // console.log("Call to doWork took " + (t1 - t0) + " milliseconds.")
     }
 
     canvasResize(){
@@ -69,6 +66,8 @@ export default class GameManager{
         this.wasm.wasm_data.delete(this.wasmBuf);
         //const offset = this.wasm.exports.wasmrealloc(this.wasmBuf.offset,arrSize);
         this.wasm.exports.wasmfree(this.wasmBuf.offset);
+        console.log(this.wasm.memory)
+        console.log(this.wasmBuf.offset);
         const offset = this.wasm.exports.wasmmalloc(arrSize);
 
         if (offset == 0)

@@ -31,6 +31,10 @@ document.addEventListener("DOMContentLoaded",async function load(){
     gm.loadCanvasBufIntoWasm();
     gm.render();
 
+    //set up event listeners and gameloop
+    gm.setEventListeners();
+    gm.setIntervals();
+
     // wasmBytes = await loadWasmFile("../wasm/render.wasm")
     // gm.wasm = initWasm(wasmBytes, 4);
     
@@ -76,6 +80,9 @@ async function loadWasm(filePath, memory, wasmData){
                 emscripten_resize_heap: function(size){memory.grow(size);},
                 emscripten_notify_memory_growth: function(){fixWasmData(wasmData)},
                 js_console_log: wasmConsoleLog,
+                js_sin: Math.sin,
+                js_cos: Math.cos,
+                js_tan: Math.tan,
             }
         }
     ).then(results => {
