@@ -54,7 +54,6 @@ export default class GameManager{
     render(){
         // var performance = window.performance;
         // var t0 = performance.now();
-        // this.wasm.exports.render();
         this.wasm.exports.render_voxel_space();
         this.ctx.putImageData(this.wasmBuf.data,0,0);
         // var t1 = performance.now();

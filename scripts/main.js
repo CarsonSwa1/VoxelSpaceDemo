@@ -7,8 +7,8 @@ const ctx = canvas.getContext("2d");
 const gm = new GameManager(ctx);
 const maps = new Maps(4);
 
-const colorMapPath = "../assets/C1W.png";
-const depthMapPath = "../assets/D1.png";
+const colorMapPath = "../assets/C2W.png";
+const depthMapPath = "../assets/D2.png";
 
 //WASM variables
 let exports, memory, wasm_data;
@@ -30,6 +30,15 @@ document.addEventListener("DOMContentLoaded",async function load(){
     gm.setWasm(exports, memory, wasm_data);
     gm.loadCanvasBufIntoWasm();
     gm.render();
+
+
+    //set wasm variables
+    const heightInput = document.getElementById("playerHeightInput");
+    heightInput.value = 150;
+    exports.setPlayerHeight(heightInput.value);
+    heightInput.addEventListener("change",()=>{
+        exports.setPlayerHeight(heightInput.value);
+    })
 
     //set up event listeners and gameloop
     gm.setEventListeners();

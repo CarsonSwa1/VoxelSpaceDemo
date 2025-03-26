@@ -22,6 +22,9 @@ int render_distance = 150;
 float vision_field = 0.785398; //45 degress in radians
 float tan_half_vision_field = 0.41421356237; //tangent of 22.5 degrees (used in rendering)
 float player_speed = 1.0;
+float player_height = 150.0;
+float horizon = 255.0;
+float scale_height = 200.0;
 float rotation_speed = 0.05;
 
 //Game Variables
@@ -44,6 +47,9 @@ int map_width = 0;
 int map_height = 0;
 int map_depth = 0;
 
+void EMSCRIPTEN_KEEPALIVE setPlayerHeight(float height){
+    player_height = height;
+}
 
 void EMSCRIPTEN_KEEPALIVE move_player(uint8_t keyCode){    
     switch(keyCode){
@@ -123,7 +129,7 @@ void EMSCRIPTEN_KEEPALIVE render(){
 void EMSCRIPTEN_KEEPALIVE render_voxel_space(){
     fillRectCanvas(0,canvas_height -1, canvas_width,canvas_height,0xFFEDC482);
     const float dist = tan_half_vision_field * render_distance;
-    const float col_step = canvas_width / (2 * dist);
+    const float col_step = canvas_width / floor(2 * dist + 1);
     float col = 0;
 
     float point_x = px + pdx * render_distance;
@@ -134,17 +140,22 @@ void EMSCRIPTEN_KEEPALIVE render_voxel_space(){
     float perp_y = point_y - pdx * dist; 
 
     //fillRectCanvas(0,canvas_height - 1, 100,100, 0xFF5500A1);
-    for(int j = 0; j < (int)(2 * dist + 1); j++){
-        float vx = (perp_x - px) / render_distance;
-        float vy = (perp_y - py) / render_distance;
+    for(int j = 0; j < floor(2 * dist + 1); j++){
+        // float vx = (perp_x - px) / render_distance;
+        // float vy = (perp_y - py) / render_distance;
+        float vx = (perp_x - px);
+        float vy = (perp_y - py);
+        int line_dist = ceil(sqrt(pow(vx,2) + pow(vy,2)));
+        vx /= line_dist;
+        vy /= line_dist;
 
         float sx = px + vx;
         float sy = py + vy;
 
-        int max_col_height = -1;
-        for(int i = 0; i < render_distance - 1;i++){
+        int max_col_height = 0;
+        for(int i = 0; i < line_dist;i++){
             int idx = (wrap((int)sy,map_height) * map_width + wrap((int)sx,map_width)) * 4;
-            int distform = (int)((-75 + (map[idx+3])) / sqrt(pow(py - sy,2) + pow(px - sx,2)) * 250 + 255);
+            int distform = (int)((-player_height + (map[idx+3])) / sqrt(pow(py - sy,2) + pow(px - sx,2)) * scale_height + horizon);
             if (distform > max_col_height){
                 int color = 0xFF000000 | *((int*)(map + idx)); //get color with alpha channel to 255
                 int y = canvas_height - max_col_height - 1;
