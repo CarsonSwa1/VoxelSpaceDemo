@@ -29,6 +29,7 @@ float player_height = 150.0;
 float horizon = 255.0;
 float scale_height = 200.0;
 float rotation_speed = 0.05;
+int background_color = 0xFFF5C9AE;
 
 //Game Variables
 float px = 50;
@@ -130,7 +131,7 @@ void EMSCRIPTEN_KEEPALIVE render(){
 }
 
 void EMSCRIPTEN_KEEPALIVE render_voxel_space(){
-    fillRectCanvas(0,canvas_height -1, canvas_width,canvas_height,0xFFA61F80);
+    fillRectCanvas(0,canvas_height -1, canvas_width,canvas_height,background_color);
     const float dist = tan_half_vision_field * render_distance;
     const float col_step = canvas_width / floor(2 * dist + 1);
     float col = 0;
@@ -174,7 +175,7 @@ void EMSCRIPTEN_KEEPALIVE render_voxel_space(){
         perp_x -= pdy;
         perp_y += pdx;
     }
-    convertCanvasToAtkinsonDither();
+    //convertCanvasToAtkinsonDither();
 }
 
 void convertCanvasToGrayScale(){

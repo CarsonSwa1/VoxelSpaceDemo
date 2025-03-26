@@ -4,12 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./styles/app.css">
+    <script defer src="./web-components/KeyButton.js"></script>
     <title>Voxel Space</title>
 </head>
 <body>
     <div class="container">
         <canvas id="gameScreen" style="border: 5px solid black"></canvas>
-        <input id="playerHeightInput" type="number" style="height: 20px; width: 50px; text-align: right">
+        <div class="keybox">
+            <div class="keybox-container">
+                <div class="key" style="grid-area: up"><key-button key = '^'>^</key-button></div>
+                <div class="key" style="grid-area: left"><key-button key = '<'><</key-button></div>
+                <div class="key" style="grid-area: down"><key-button key = 'v'>v</key-button></div>
+                <div class="key" style="grid-area: right"><key-button key = '>'>></key-button></div>
+            </div>
+        </div>
+        
     </div>
     
     

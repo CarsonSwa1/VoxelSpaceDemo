@@ -18,7 +18,6 @@ document.addEventListener("DOMContentLoaded",async function load(){
     memory = new WebAssembly.Memory({initial: 2, maximum: 256});
     wasm_data = new Set();
     exports = await loadWasm("../wasm/render.wasm",memory,wasm_data);
-    console.log(exports)
 
     //load map into wasm
     maps.setWasm(exports,memory,wasm_data);
@@ -33,12 +32,12 @@ document.addEventListener("DOMContentLoaded",async function load(){
 
 
     //set wasm variables
-    const heightInput = document.getElementById("playerHeightInput");
-    heightInput.value = 150;
-    exports.setPlayerHeight(heightInput.value);
-    heightInput.addEventListener("change",()=>{
-        exports.setPlayerHeight(heightInput.value);
-    })
+    // const heightInput = document.getElementById("playerHeightInput");
+    // heightInput.value = 150;
+    // exports.setPlayerHeight(heightInput.value);
+    // heightInput.addEventListener("change",()=>{
+    //     exports.setPlayerHeight(heightInput.value);
+    // })
 
     //set up event listeners and gameloop
     gm.setEventListeners();

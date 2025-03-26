@@ -8,15 +8,6 @@ html,body{
     padding: 0; 
 }
 
-h3{
-    color: red;
-}
-
-ul{ 
-    list-style-type: disc;
-    padding-left: 40px !important;
-}
-
 .container{
     background-color: rgb(47, 44, 44);
     width: 100vw;
@@ -24,5 +15,45 @@ ul{
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
+    row-gap: 10px;
+}
+
+.keybox{
+    width: 50%;
+    height: 20%;
+    border: 2px solid white;
+    border-radius: 20px;
+    background-color: rgb(188, 22, 22);
+    display: flex;
+    justify-content: center;
+    align-items: center;
     
+}
+
+.keybox-container{
+    width: 60%;
+    height: 70%;
+    display: grid;
+    overflow: hidden;
+    min-width: 0;
+    min-height: 0;
+    grid-template-columns: repeat(3,1fr);
+    grid-template-rows: repeat(2,1fr);
+    gap: 5px;
+    grid-template-areas: ". up ."
+                         "left down right";
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.key{
+    background-color: black;
+    width: 80%;
+    height: 70%;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
 }
