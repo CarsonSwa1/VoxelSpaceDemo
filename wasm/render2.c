@@ -9,6 +9,9 @@
 #define PI_OVER_TWO .5 * PI
 
 //Prototypes
+void convertCanvasToGrayScale();
+void convertCanvasToBurkesDither();
+void addToCanvasPixelInt(int x, int y,int val);
 void plotLine(int x0,int y0,int x1,int y1, int color);
 void fillRectCanvas(int x,int y,int w,int h, int color);
 int wrap(int num, int modul);
@@ -171,7 +174,57 @@ void EMSCRIPTEN_KEEPALIVE render_voxel_space(){
         perp_x -= pdy;
         perp_y += pdx;
     }
-    
+    convertCanvasToBurkesDither();
+}
+
+void convertCanvasToGrayScale(){
+    for (int y = 0; y < canvas_height; y++){
+        for (int x = 0; x < canvas_width;x++){
+            int idx = (y * canvas_width + x) * 4;
+            uint8_t r = canvas[idx + 0];
+            uint8_t g = canvas[idx + 1];
+            uint8_t b = canvas[idx + 2];
+            uint8_t avg = floor((r + g + b) / 3.0);
+            *(int*)(canvas + idx) = 0xFF000000 | (avg << 16) | (avg << 8) | (avg);
+        }
+    }
+}
+
+void addToCanvasPixelInt(int x, int y,int val){
+    if (!(y >= 0 && y < canvas_height && x >= 0 && x < canvas_width))
+        return;
+    int idx = (y * canvas_width + x) * 4;
+    int canvas_val = *(int*)(canvas + idx);
+    *(int*)(canvas + idx) += val;
+}
+
+void convertCanvasToBurkesDither(){
+    for (int y = 0; y < canvas_height; y++){
+        for (int x = 0; x < canvas_width;x++){
+            int idx = (y * canvas_width + x) * 4;
+            uint8_t r = canvas[idx + 0];
+            uint8_t g = canvas[idx + 1];
+            uint8_t b = canvas[idx + 2];
+            uint8_t avg = floor((r + g + b) / 3.0);
+            *(int*)(canvas + idx) = (int)avg;
+        }
+    }
+
+    for (int y = 0; y < canvas_height; y++){
+        for (int x = 0; x < canvas_width;x++){
+            int idx = (y * canvas_width + x) * 4;
+            int old_val = *(int*)(canvas + idx);
+            int new_val = (old_val > 128) ? 255 : 0;
+            int error = abs(old_val - new_val) >> 5;
+            addToCanvasPixelInt(x + 1,y,error * 7);
+            addToCanvasPixelInt(x - 1,y+1,error * 3);
+            addToCanvasPixelInt(x,y+1,error * 5);
+            addToCanvasPixelInt(x + 1,y+1,error);
+            uint8_t bit = (uint8_t)new_val;
+            *(int*)(canvas + idx) = 0xFF000000 | (bit << 16) | (bit << 8) | (bit);
+        }
+    }
+
 }
 
 void fillRectCanvas(int x,int y,int w,int h, int color){
