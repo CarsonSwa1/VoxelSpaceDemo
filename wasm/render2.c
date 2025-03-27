@@ -176,6 +176,7 @@ void EMSCRIPTEN_KEEPALIVE render_voxel_space(){
         perp_y += pdx;
     }
     //convertCanvasToAtkinsonDither();
+    //convertCanvasToGrayScale();
 }
 
 void convertCanvasToGrayScale(){

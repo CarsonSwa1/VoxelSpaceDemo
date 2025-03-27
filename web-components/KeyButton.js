@@ -1,68 +1,96 @@
-function makeTemplate(grid_area){
-    const template = document.createElement("template");
-    template.innerHTML = `
-        <style>
-            .box{
-                width: 107.25px;
-                height: 42.875px;
-                min-width: 0;
-                min-height: 0;
-                background-color: white;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                justify-self: center;
-                align-self: center;
-                padding: 10%;
-                transition: property: background-color, padding;
-                transition-duration: .2s;
-                transition-timing-function: linear;
-            }
-
-            .clicked-box{
-                background-color: rgb(38, 146, 51);
-                padding: 0%;
-            }
-
-            h3{
-                color: gray;
-            }
-        </style>
-    
-        <div id="box" class="box">
-            <h3>
-                <slot></slot>
-            </h3>
-        </div>
-    `
-    return template
-}
-
-
 class KeyButton extends HTMLElement {
-    static observedAttributes = ["key", "gridArea"]
+    static observedAttributes = ["key", "gridArea","width","height"]
 
     constructor(){
         super();
-        const shadow = this.attachShadow({mode: "open"});
-        const template = makeTemplate(this.getAttribute("gridArea"));
-        shadow.append(template.content.cloneNode(true));
-        this.box = shadow.getElementById("box");
+        // NOTE:
+        // abandoned shadow dom because it wasnt working with the grid
+        this.width = this.getAttribute("width") ?? "100%";
+        this.height = this.getAttribute("height") ?? "100%";
+        this.key = this.getAttribute("key") ?? "^";
+        this.gridArea = this.getAttribute("gridArea") ?? "u";
+        this.text = this.innerText;
+
+        
+        this.classList.add("var")
+        this.style.width = this.width;
+        this.style.height = this.height;
+        this.style.gridArea = this.gridArea;
+        this.style.justifySelf = "center";
+        this.style.alignSelf = "center";
+
+        this.innerHTML = this.makeTemplate().innerHTML;
+
+        this.eventPress = new CustomEvent("keyButtonEvent", {detail: {key: this.key, press: true}});
+        this.eventUnpress = new CustomEvent("keyButtonEvent", {detail: {key: this.key, press: false}});
+        this.hover = false;
+    }
+
+    makeTemplate(){
+        const template = document.createElement("template");
+        template.innerHTML = `
+            <div class="background-box">
+                <div class="box">
+                    <div class="key-text no-select">
+                        ${this.text}
+                    </div>
+                </div>
+            </div>
+        `
+        return template;
     }
 
     connectedCallback() {
         // Custom element added to page
-        this.box.addEventListener("mouseover", (e) => {
-            this.box.classList.add("clicked-box");
-        })
+        this.dispatchPress = () => {
+            this.style.setProperty("--current-border-width", "5px");
+            this.style.setProperty("--box-color", "green");
+            document.dispatchEvent(this.eventPress);
+        }
+        this.dispatchUnpress = () => {
+            this.style.setProperty("--current-border-width", (this.hover) ? "2px" : "0px");
+            this.style.setProperty("--box-color", "black");
+            document.dispatchEvent(this.eventUnpress);
+        }
+        this.handleKey = (e) => {
+            if (e.detail.pressed){
+                this.style.setProperty("--current-border-width", "5px");
+                this.style.setProperty("--box-color", "green");
+            }
+            else{
+                this.style.setProperty("--current-border-width", (this.hover) ? "2px" : "0px");
+                this.style.setProperty("--box-color", "black");
 
-        this.box.addEventListener("mouseleave", (e) => {
-            this.box.classList.remove("clicked-box");
-        })
+            }
+        }
+
+        this.handleHover = () => {
+            this.hover = true; 
+            this.style.setProperty("--current-border-width","2px")
+        }
+
+        this.handleLeave = () => {
+            this.hover = false; 
+            this.style.setProperty("--current-border-width","0px")
+        }
+
+        this.addEventListener("mousedown",this.dispatchPress);
+        this.addEventListener("mouseup", this.dispatchUnpress);
+        this.addEventListener("mouseleave", this.dispatchUnpress);
+        document.addEventListener(this.key, this.handleKey);
+        this.addEventListener("mouseover",this.handleHover)
+        this.addEventListener("mouseleave",this.handleLeave)
+
     }
     
     disconnectedCallback() {
         // Custom element removed from page
+        this.removeEventListener("mousedown",this.dispatchPress);
+        this.removeEventListener("mouseup", this.dispatchUnpress);
+        this.removeEventListener("mouseleave", this.dispatchUnpress);
+        document.removeEventListener(this.key, this.handleKey);
+        this.removeEventListener("mouseover",this.handleHover);
+        this.removeEventListener("mouseleave",this.handleLeave);
     }
 
     adoptedCallback() {

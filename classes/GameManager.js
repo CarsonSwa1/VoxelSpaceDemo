@@ -17,16 +17,18 @@ export default class GameManager{
 
 
     setEventListeners(){
-        this.keyPress = (e) => {
-            this.keys[getKeyCode(e.key)] = true;
-        }
-        this.keyUnpress = (e) => {
-            this.keys[getKeyCode(e.key)] = false;
-        }
-        
+        this.keyEvent = (key, press) => {
+            document.dispatchEvent(new CustomEvent(key,{detail: {pressed: press}}));
+            this.keys[getKeyCode(key)] = press;
+        };
+        this.keyPress = (e) => {this.keyEvent(e.key,true);};
+        this.keyUnpress = (e) => {this.keyEvent(e.key, false)};
+        this.keyButtonEvent = (e) => {this.keys[getKeyCode(e.detail.key)] = e.detail.press;};
+
 
         document.addEventListener('keydown',this.keyPress);
         document.addEventListener('keyup',this.keyUnpress);
+        document.addEventListener("keyButtonEvent",this.keyButtonEvent);
     }
 
     setIntervals(){
@@ -115,7 +117,7 @@ export default class GameManager{
 
 
 function getKeyCode(key){
-    let ret = -1
+    let ret = -1;
     switch(key){
         case "ArrowLeft":
             ret = 0
@@ -128,6 +130,12 @@ function getKeyCode(key){
             break;
         case "ArrowDown":
             ret = 3;
+            break;
+        case "z":
+            ret = 4;
+            break;
+        case "x":
+            ret = 5;
             break;
     }
     return ret;

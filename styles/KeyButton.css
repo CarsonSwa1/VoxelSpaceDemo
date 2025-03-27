@@ -1,0 +1,35 @@
+.background-box{
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+}
+
+.var{
+    --current-border-width: 0px;
+    --box-color: black;
+}
+
+.box{
+    --max-border-width: 5px;
+    width: calc(100% - 2 * var(--max-border-width));
+    height: calc(100% - 2 * var(--max-border-width));
+    padding: calc(var(--max-border-width) - var(--current-border-width));
+    border: var(--current-border-width) solid white;
+    background-color: var(--box-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition-property: var(--current-border-width), var(--box-color);
+    transition-duration: .1s;
+    transition-timing-function: linear;
+    border-radius: 10px;
+}
+
+.key-text{
+    color: white;
+    font-size: 2vh;
+}

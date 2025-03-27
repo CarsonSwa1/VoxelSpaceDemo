@@ -4,22 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./styles/app.css">
+    <link rel="stylesheet" href="./styles/KeyButton.css">
     <script defer src="./web-components/KeyButton.js"></script>
-    <title>Voxel Space</title>
+    <title>Voxel Space Demo</title>
 </head>
 <body>
-    <div class="container">
-        <canvas id="gameScreen" style="border: 5px solid black"></canvas>
-        <div class="keybox">
-            <div class="keybox-container">
-                <div class="key" style="grid-area: up"><key-button key = '^'>^</key-button></div>
-                <div class="key" style="grid-area: left"><key-button key = '<'><</key-button></div>
-                <div class="key" style="grid-area: down"><key-button key = 'v'>v</key-button></div>
-                <div class="key" style="grid-area: right"><key-button key = '>'>></key-button></div>
+    <div class="page-container">
+        <div class="header-container"></div>
+        <div class="game-container">
+            <canvas id="gameScreen" style="border: 5px solid black"></canvas>
+            <div class="controls-container flex-center">
+                <div class="controls-grid">
+                    <key-button key="ArrowUp" gridArea="u">^</key-button>
+                    <key-button key="ArrowLeft" gridArea="l"><</key-button>
+                    <key-button key="ArrowDown" gridArea="d">v</key-button>
+                    <key-button key="ArrowRight" gridArea="r">></key-button>
+                    <key-button key="z" gridArea="z">z</key-button>
+                    <key-button key="x" gridArea="x">x</key-button>
+                </div>
             </div>
         </div>
-        
     </div>
+    
     
     
     <script type="module" src="./scripts/main.js"></script>

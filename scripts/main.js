@@ -30,15 +30,6 @@ document.addEventListener("DOMContentLoaded",async function load(){
     gm.loadCanvasBufIntoWasm();
     gm.render();
 
-
-    //set wasm variables
-    // const heightInput = document.getElementById("playerHeightInput");
-    // heightInput.value = 150;
-    // exports.setPlayerHeight(heightInput.value);
-    // heightInput.addEventListener("change",()=>{
-    //     exports.setPlayerHeight(heightInput.value);
-    // })
-
     //set up event listeners and gameloop
     gm.setEventListeners();
     gm.setIntervals();
