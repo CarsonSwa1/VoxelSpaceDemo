@@ -9,14 +9,14 @@
     <title>Voxel Space Demo</title>
 </head>
 <body>
-    <div class="page-container">
+    <div class="page-container" id="page-container">
         <div class="header-container flex-center">
             <div class="header-title">
                 Voxel Space Demo
             </div>
         </div>
         <div class="game-container">
-            <canvas id="gameScreen" style="border: 5px solid black"></canvas>
+            <canvas id="gameScreen" class="game-canvas"></canvas>
             <div class="controls-container flex-center">
                 <div class="controls-grid">
                     <key-button key="ArrowUp" gridArea="u">^</key-button>
@@ -28,6 +28,7 @@
                 </div>
             </div>
         </div>
+        <div class="fps" id="fps-counter">FPS: 60.0</div>
     </div>
     
     

@@ -11,7 +11,9 @@
 //Prototypes
 void convertCanvasToGrayScale();
 void convertCanvasToAtkinsonDither();
+void convertCanvasToBoxFilterBlur();
 void addToCanvasPixelInt(int x, int y,int val);
+int get_canvas_color(int x, int y);
 void plotLine(int x0,int y0,int x1,int y1, int color);
 void fillRectCanvas(int x,int y,int w,int h, int color);
 int wrap(int num, int modul);
@@ -21,7 +23,7 @@ float js_cos(float angle);
 float js_tan(float angle);
 
 //Game Environment Variables
-int render_distance = 150;
+int render_distance = 350;
 float vision_field = 0.785398; //45 degress in radians
 float tan_half_vision_field = 0.41421356237; //tangent of 22.5 degrees (used in rendering)
 float player_speed = 1.0;
@@ -175,6 +177,7 @@ void EMSCRIPTEN_KEEPALIVE render_voxel_space(){
         perp_x -= pdy;
         perp_y += pdx;
     }
+    //convertCanvasToBoxFilterBlur();
     //convertCanvasToAtkinsonDither();
     //convertCanvasToGrayScale();
 }
@@ -229,6 +232,37 @@ void convertCanvasToAtkinsonDither(){
         }
     }
 
+}
+
+void convertCanvasToBoxFilterBlur(){
+    for (int y = 0; y < canvas_height; y++){
+        for (int x = 0; x < canvas_width;x++){
+            int idx = (y * canvas_width + x) * 4;
+            int r = 0;
+            int b = 0;
+            int g = 0;
+            for (int dy = 0; dy < 11;dy++){
+                for(int dx = 0; dx < 11; dx++){
+                    int color = get_canvas_color(x - 5 + dx, y - 5 + dy);
+                    r += (color & 0x000000FF);
+                    g += (color & 0x0000FF00) >> 8;
+                    b += (color & 0x00FF0000) >> 16;
+                }
+            }
+            r >>= 7;
+            g >>= 7;
+            b >>= 7;
+            int avg = 0xFF000000 | (b << 16) | (g << 8) | r;
+            *(int*)(canvas + idx) = avg;
+        }
+    }
+}
+
+int get_canvas_color(int x, int y){
+    if (!(x >= 0 && x < canvas_width && y >= 0 && y < canvas_height))
+        return 0;
+    int idx = (y * canvas_width + x) * 4;
+    return *(int*)(canvas + idx);
 }
 
 void fillRectCanvas(int x,int y,int w,int h, int color){

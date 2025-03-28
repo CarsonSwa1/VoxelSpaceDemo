@@ -1,5 +1,7 @@
 import WasmArray from "../classes/WasmArray.js";
 
+const fps = document.getElementById("fps-counter");
+
 export default class GameManager{  
     constructor(ctx){
         this.frameRate = (1000/60);
@@ -32,10 +34,26 @@ export default class GameManager{
     }
 
     setIntervals(){
-        this.gameLoop = window.setInterval(() => {
+        // this.gameLoop = window.setInterval(() => {
+        //     this.movePlayer();
+        //     this.render();
+        // },this.frameRate)
+        let prev_time = 0;
+        let ticks = 0;
+        this.draw = () => {
+            requestAnimationFrame(this.draw);
             this.movePlayer();
             this.render();
-        },this.frameRate)
+            const now = performance.now();
+            if ((now - prev_time) > 1000){
+                fps.textContent = "FPS: " + (1000 / ((now - prev_time) / ticks)).toFixed(1);
+                prev_time = now;
+                ticks = -1;
+            }
+            ticks += 1
+        }
+
+        this.draw();
     }
     
     movePlayer(){

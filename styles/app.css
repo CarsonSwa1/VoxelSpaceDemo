@@ -24,10 +24,18 @@ html,body{
                                     supported by Chrome, Edge, Opera and Firefox */
   }
 
+
+
 .page-container{
     width: 100vw;
     height: 100vh;
+    /*page global variables*/
     --header-height: 10vh;
+    --game-canvas-height: 0px;
+    --game-canvas-width: 0px;
+    --game-canvas-left: 0px;
+    --game-canvas-top: 0px;
+    --game-canvas-border: 5px;
 }
 
 .header-container{
@@ -49,6 +57,17 @@ html,body{
     justify-content: space-evenly;
     align-items: center;
     flex-direction: column;
+}
+
+.game-canvas{
+    border: var(--game-canvas-border) solid black;
+}
+
+.fps{
+    position: absolute;
+    left: calc(var(--game-canvas-left) + var(--game-canvas-width) + (2 * var(--game-canvas-border)) + 10px);
+    top: calc(var(--game-canvas-top) + 10px);
+    color: white;
 }
 
 .controls-container{

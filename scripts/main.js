@@ -1,6 +1,8 @@
 import GameManager from "../classes/GameManager.js";
 import Maps from "../classes/Maps.js";
 
+const page = document.getElementById("page-container")
+
 const canvas = document.getElementById("gameScreen");
 const ctx = canvas.getContext("2d");
 
@@ -57,8 +59,7 @@ function wait(milliseconds) {
   }
 
 window.addEventListener("resize",() => {
-    canvas.width = window.innerWidth * .4;
-    canvas.height = window.innerHeight * .5;
+    setCanvas();
     gm.canvasResize();
     gm.render();
 })
@@ -67,6 +68,13 @@ window.addEventListener("resize",() => {
 function setCanvas(){
     canvas.width = window.innerWidth * .4;
     canvas.height = window.innerHeight * .5;
+    const rect = canvas.getBoundingClientRect();
+    const left = rect.left + window.scrollX;
+    const top = rect.top + window.scrollY;
+    page.style.setProperty("--game-canvas-width",canvas.width + "px");
+    page.style.setProperty("--game-canvas-height",canvas.height + "px");
+    page.style.setProperty("--game-canvas-left",left + "px");
+    page.style.setProperty("--game-canvas-top",top + "px");
 }
 
 
