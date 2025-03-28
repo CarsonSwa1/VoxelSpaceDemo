@@ -19,6 +19,8 @@ export default class GameManager{
 
 
     setEventListeners(){
+
+        // Keyboard Events
         this.keyEvent = (key, press) => {
             document.dispatchEvent(new CustomEvent(key,{detail: {pressed: press}}));
             this.keys[getKeyCode(key)] = press;
@@ -31,6 +33,38 @@ export default class GameManager{
         document.addEventListener('keydown',this.keyPress);
         document.addEventListener('keyup',this.keyUnpress);
         document.addEventListener("keyButtonEvent",this.keyButtonEvent);
+
+
+        //Settings input events
+
+        //render distance input field
+        this.render_distance_input = document.getElementById("input-render-distance");
+        this.render_distance_input.value = 150;
+        this.updateRenderDistance = () => {
+            this.wasm.exports.setRenderDistance(this.render_distance_input.value);
+        }
+        this.updateRenderDistance();
+        this.render_distance_input.addEventListener("change",this.updateRenderDistance);
+
+
+        //horizon input field
+        this.horizon_input = document.getElementById("input-horizon");
+        this.horizon_input.value = 255;
+        this.updateHorizon = () => {
+            this.wasm.exports.setHorizon(this.horizon_input.value);
+        }
+        this.updateHorizon();
+        this.horizon_input.addEventListener("change",this.updateHorizon);
+
+
+        //vision field input
+        this.vison_field = document.getElementById("input-vision-field");
+        this.vison_field.value = 45;
+        this.updateVisionField = () => {
+            this.wasm.exports.setVisionField(this.vison_field.value);
+        }
+        this.updateVisionField();
+        this.vison_field.addEventListener("change",this.updateVisionField);
     }
 
     setIntervals(){

@@ -1,0 +1,49 @@
+.settings-page-container{
+    width: 20%;
+    height: 70%;
+    position: absolute;
+    left: 5%;
+    top: calc(var(--game-canvas-top) + var(--game-canvas-border));
+}
+
+.settings-drop-down-button{
+    width: 25%;
+    height: 5%;
+    background-color: white;   
+    border-radius: 5px;
+}
+
+.settings-page{
+    width: 100%;
+    height: 0%;
+    background-color: rgb(231, 218, 201);
+    border-radius: 15px;
+    visibility: hidden;
+    transition: height 1s, visibility 1s cubic-bezier(0.075, 0.82, 0.165, 1);
+    display: flex;
+    flex-direction: column;
+    row-gap: 5px;
+    justify-content: center;
+    align-items: center;
+    border: 5px solid white;
+    padding: 5px;
+}
+
+.settings-input{
+    width: 100%;
+    display: grid;
+    min-width: 0px;
+    min-height: 0px;
+    overflow: hidden;
+    grid-template-columns: 65% 25%;;
+}
+
+.input-title{
+    font-size: 1vw;
+    white-space: nowrap;
+}
+
+.visible{
+    height: 100%;
+    visibility: visible !important;
+}

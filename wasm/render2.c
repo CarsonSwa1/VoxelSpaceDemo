@@ -7,6 +7,7 @@
 #define PI 3.14159265358979323846
 #define TWO_PI 2 * PI
 #define PI_OVER_TWO .5 * PI
+#define DEGREES_TO_RADIANS 0.0174533
 
 //Prototypes
 void convertCanvasToGrayScale();
@@ -23,7 +24,7 @@ float js_cos(float angle);
 float js_tan(float angle);
 
 //Game Environment Variables
-int render_distance = 350;
+int render_distance = 150;
 float vision_field = 0.785398; //45 degress in radians
 float tan_half_vision_field = 0.41421356237; //tangent of 22.5 degrees (used in rendering)
 float player_speed = 1.0;
@@ -53,8 +54,22 @@ int map_width = 0;
 int map_height = 0;
 int map_depth = 0;
 
+
 void EMSCRIPTEN_KEEPALIVE setPlayerHeight(float height){
     player_height = height;
+}
+
+void EMSCRIPTEN_KEEPALIVE setRenderDistance(int rdist){
+    render_distance = rdist;
+}
+
+void EMSCRIPTEN_KEEPALIVE setHorizon(int new_horizon){
+    horizon = new_horizon;
+}
+
+void EMSCRIPTEN_KEEPALIVE setVisionField(float degrees){
+    vision_field = degrees * DEGREES_TO_RADIANS;
+    tan_half_vision_field = js_tan(vision_field * .5);
 }
 
 void EMSCRIPTEN_KEEPALIVE move_player(uint8_t keyCode){    
