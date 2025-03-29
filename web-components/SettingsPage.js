@@ -39,6 +39,15 @@ class SettingsPage extends HTMLElement{
                     </div>
                 </div>
 
+                <div class="settings-input">
+                    <div class="flex-center" style="width: 100%; height: 100%">
+                        <div class="input-title">Background Color:</div>
+                    </div>
+                    <div class="flex-center" style="width: 100%; height: 100%">
+                        <input type="color" class="input-title" id="input-background-color" style="width: 100%;">
+                    </div>
+                </div>
+
             </div>
         `
         return template;

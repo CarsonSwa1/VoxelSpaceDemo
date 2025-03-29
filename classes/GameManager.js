@@ -44,7 +44,7 @@ export default class GameManager{
             this.wasm.exports.setRenderDistance(this.render_distance_input.value);
         }
         this.updateRenderDistance();
-        this.render_distance_input.addEventListener("change",this.updateRenderDistance);
+        this.render_distance_input.addEventListener("input",this.updateRenderDistance);
 
 
         //horizon input field
@@ -54,7 +54,7 @@ export default class GameManager{
             this.wasm.exports.setHorizon(this.horizon_input.value);
         }
         this.updateHorizon();
-        this.horizon_input.addEventListener("change",this.updateHorizon);
+        this.horizon_input.addEventListener("input",this.updateHorizon);
 
 
         //vision field input
@@ -64,7 +64,20 @@ export default class GameManager{
             this.wasm.exports.setVisionField(this.vison_field.value);
         }
         this.updateVisionField();
-        this.vison_field.addEventListener("change",this.updateVisionField);
+        this.vison_field.addEventListener("input",this.updateVisionField);
+
+        //background color input
+        this.background_color = document.getElementById("input-background-color");
+        this.background_color.value = "#AEC9F5";
+        this.updateBackgroundColor = () => {
+            const color = this.background_color.value;
+            const color_little_endian = "FF" + color.substring(5) + color.substring(3,5) + color.substring(1,3);
+            const int_color = parseInt(color_little_endian,16);
+            this.wasm.exports.setBackgroundColor(int_color);
+        }
+        this.updateBackgroundColor();
+        this.background_color.addEventListener("input",this.updateBackgroundColor);
+
     }
 
     setIntervals(){
@@ -102,6 +115,12 @@ export default class GameManager{
         }
         if (this.keys[3]){
             this.wasm.exports.move_player(3);
+        }
+        if (this.keys[4]){
+            this.wasm.exports.move_player(4);
+        }
+        if (this.keys[5]){
+            this.wasm.exports.move_player(5);
         }
     }
 

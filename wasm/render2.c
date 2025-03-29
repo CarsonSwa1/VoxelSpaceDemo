@@ -54,7 +54,7 @@ int map_width = 0;
 int map_height = 0;
 int map_depth = 0;
 
-
+//setter functions
 void EMSCRIPTEN_KEEPALIVE setPlayerHeight(float height){
     player_height = height;
 }
@@ -72,6 +72,12 @@ void EMSCRIPTEN_KEEPALIVE setVisionField(float degrees){
     tan_half_vision_field = js_tan(vision_field * .5);
 }
 
+void EMSCRIPTEN_KEEPALIVE setBackgroundColor(int color){
+    background_color = color;
+}
+
+
+//game functions
 void EMSCRIPTEN_KEEPALIVE move_player(uint8_t keyCode){    
     switch(keyCode){
         case 0: //Left Arrow
@@ -91,6 +97,12 @@ void EMSCRIPTEN_KEEPALIVE move_player(uint8_t keyCode){
         case 3: //Down Arrow
             px -= pdx * player_speed;
             py -= pdy * player_speed;
+            break;
+        case 4:
+            player_height += player_speed;
+            break;
+        case 5:
+            player_height -= player_speed;
             break;
     }
 }
