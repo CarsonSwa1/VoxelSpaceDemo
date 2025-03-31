@@ -21,7 +21,7 @@ class SettingsPage extends HTMLElement{
                             <div class="input-title">Player Move Speed:</div>
                         </div>
                         <div class="flex-center" style="width: 100%; height: 100%">
-                            <input type="number" min="0" step="0.50" class="input-title" id="input-player-move-speed" style="width: 100%;">
+                            <input type="number" min="0" step="0.25" class="input-title" id="input-player-move-speed" style="width: 100%;">
                         </div>
                     </div>
                     

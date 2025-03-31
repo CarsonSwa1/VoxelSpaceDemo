@@ -27,6 +27,7 @@
     align-items: center;
     border: 5px solid white;
     padding: 5px;
+    overflow: hidden;
 }
 
 .settings-sub-group-container{

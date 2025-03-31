@@ -46,7 +46,7 @@ export default class GameManager{
         this.player_move_speed_input = document.getElementById("input-player-move-speed");
         this.player_move_speed_input.value = 1;
         this.updatePlayerMoveSpeed = () => {
-            this.player_move_speed = (1000/60) * this.player_move_speed_input.value;
+            this.player_move_speed = (1000/60) / this.player_move_speed_input.value;
         }
         this.updatePlayerMoveSpeed();
         this.player_move_speed_input.addEventListener("input",this.updatePlayerMoveSpeed);
@@ -133,7 +133,7 @@ export default class GameManager{
     
     movePlayer(frame_rate){
         // i should rewrite this to use a int with bitmask instead of array
-        const move_speed = this.player_move_speed / frame_rate;
+        const move_speed = frame_rate / this.player_move_speed;
         const rotate_speed = frame_rate / this.player_rotate_speed;
 
         if (this.keys[0]){
