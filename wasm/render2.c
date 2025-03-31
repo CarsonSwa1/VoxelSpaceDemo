@@ -18,7 +18,8 @@ int get_canvas_color(int x, int y);
 void plotLine(int x0,int y0,int x1,int y1, int color);
 void fillRectCanvas(int x,int y,int w,int h, int color);
 void fillRectMapCanvas(int x,int y,int w,int h, int color);
-int wrap(int num, int modul);
+inline int wrap(int num, int modul);
+inline int min(int a, int b);
 void console_log(char* str);
 float js_sin(float angle);
 float js_cos(float angle);
@@ -54,6 +55,7 @@ uint8_t* map;
 int map_width = 0;
 int map_height = 0;
 int map_depth = 0;
+int player_size = 0;
 
 //Map Canvas Variables
 uint8_t* map_canvas;
@@ -85,31 +87,31 @@ void EMSCRIPTEN_KEEPALIVE setBackgroundColor(int color){
 
 
 //game functions
-void EMSCRIPTEN_KEEPALIVE move_player(uint8_t keyCode){    
+void EMSCRIPTEN_KEEPALIVE move_player(uint8_t keyCode, float p_speed){    
     switch(keyCode){
         case 0: //Left Arrow
-            pa -= rotation_speed;
+            pa -= p_speed;
             pdx = js_cos(pa);
             pdy = js_sin(pa);
             break;
         case 1: //Right Arrow
-            pa += rotation_speed;
+            pa += p_speed;
             pdx = js_cos(pa);
             pdy = js_sin(pa);
             break;
         case 2: //Up Arrow
-            px += pdx * player_speed;
-            py += pdy * player_speed;
+            px += pdx * p_speed;
+            py += pdy * p_speed;
             break;
         case 3: //Down Arrow
-            px -= pdx * player_speed;
-            py -= pdy * player_speed;
+            px -= pdx * p_speed;
+            py -= pdy * p_speed;
             break;
         case 4:
-            player_height += player_speed;
+            player_height += p_speed;
             break;
         case 5:
-            player_height -= player_speed;
+            player_height -= p_speed;
             break;
     }
 }
@@ -126,9 +128,6 @@ void EMSCRIPTEN_KEEPALIVE set_canvas(int width, int height, int depth,int ptr){
     canvas_height = height;
     canvas_depth = depth;
     canvas = (uint8_t*)ptr;
-    // char buf[50];
-    // sprintf(buf, "Hello World! %d\n", 123);
-    // console_log(buf);
 }
 
 void EMSCRIPTEN_KEEPALIVE set_map_canvas(int width, int height, int depth, int ptr){
@@ -136,6 +135,7 @@ void EMSCRIPTEN_KEEPALIVE set_map_canvas(int width, int height, int depth, int p
     map_canvas_height = height;
     map_canvas_depth = depth;
     map_canvas = (uint8_t*)ptr;
+    player_size = min(map_canvas_width,map_canvas_height) / 28;
 }
 
 void EMSCRIPTEN_KEEPALIVE render(){
@@ -243,7 +243,7 @@ void EMSCRIPTEN_KEEPALIVE render_map(){
     int player_y0 = floor(py / y_ratio);
     int player_x1 = floor((px + pdx * 30) / x_ratio);
     int player_y1 = floor((py + pdy * 30) / y_ratio);
-    fillRectMapCanvas(player_x0-5,player_y0+5,10,10,0xAFF0FFFF);
+    fillRectMapCanvas(player_x0 - (player_size >> 1) ,player_y0 + (player_size >> 1),player_size,player_size,0xAFF0FFFF);
     plotLine(player_x0, player_y0, player_x1, player_y1, 0xAFF0FFFF);
 
 
@@ -350,12 +350,17 @@ void fillRectMapCanvas(int x,int y,int w,int h, int color){
     }
 }
 
-int wrap(int num, int modul){
+inline int wrap(int num, int modul){
     int res = num % modul;
     if (num < 0)
         res += modul;
     return res;
 }
+
+inline int min(int a, int b) {
+    return (a < b) ? a : b;
+}
+
 //Bresenham's Line algorithm
 void plotLine(int x0,int y0,int x1,int y1, int color){
     int dx = abs(x1 - x0);

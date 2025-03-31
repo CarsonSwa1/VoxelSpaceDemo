@@ -16,6 +16,9 @@ export default class GameManager{
         this.mapCanvasWasmArray = null;
 
         this.wasm = {exports: null, memory: null, wasm_data: null}
+
+        this.player_move_speed = 1000/60;
+        this.player_rotate_speed = 1000/60 / .05;
     }
 
 
@@ -38,6 +41,27 @@ export default class GameManager{
 
         //Settings input events
 
+        //GAME SETTINGS
+        //Player move speed input
+        this.player_move_speed_input = document.getElementById("input-player-move-speed");
+        this.player_move_speed_input.value = 1;
+        this.updatePlayerMoveSpeed = () => {
+            this.player_move_speed = (1000/60) * this.player_move_speed_input.value;
+        }
+        this.updatePlayerMoveSpeed();
+        this.player_move_speed_input.addEventListener("input",this.updatePlayerMoveSpeed);
+
+        //Player rotate speed input
+        this.player_rotate_speed_input = document.getElementById("input-player-rotate-speed");
+        this.player_rotate_speed_input.value = .05;
+        this.updatePlayerRotateSpeed = () => {
+            this.player_rotate_speed = (1000/60) / this.player_rotate_speed_input.value;
+        }
+        this.updatePlayerRotateSpeed();
+        this.player_rotate_speed_input.addEventListener("input",this.updatePlayerRotateSpeed);
+
+
+        //RENDER SETTINGS  
         //render distance input field
         this.render_distance_input = document.getElementById("input-render-distance");
         this.render_distance_input.value = 150;
@@ -87,12 +111,15 @@ export default class GameManager{
         //     this.render();
         // },this.frameRate)
         let prev_time = 0;
+        let prev_frame = 0;
         let ticks = 0;
         this.draw = () => {
             requestAnimationFrame(this.draw);
-            this.movePlayer();
-            this.render();
             const now = performance.now();
+            if (prev_frame != 0)
+                this.movePlayer(now - prev_frame);
+            prev_frame = now;
+            this.render();
             if ((now - prev_time) > 1000){
                 fps.textContent = "FPS: " + (1000 / ((now - prev_time) / ticks)).toFixed(1);
                 prev_time = now;
@@ -104,24 +131,28 @@ export default class GameManager{
         this.draw();
     }
     
-    movePlayer(){
+    movePlayer(frame_rate){
+        // i should rewrite this to use a int with bitmask instead of array
+        const move_speed = this.player_move_speed / frame_rate;
+        const rotate_speed = frame_rate / this.player_rotate_speed;
+
         if (this.keys[0]){
-            this.wasm.exports.move_player(0);
+            this.wasm.exports.move_player(0,rotate_speed);
         }
         if (this.keys[1]){
-            this.wasm.exports.move_player(1);
+            this.wasm.exports.move_player(1,rotate_speed);
         }
         if (this.keys[2]){
-            this.wasm.exports.move_player(2);
+            this.wasm.exports.move_player(2,move_speed);
         }
         if (this.keys[3]){
-            this.wasm.exports.move_player(3);
+            this.wasm.exports.move_player(3,move_speed);
         }
         if (this.keys[4]){
-            this.wasm.exports.move_player(4);
+            this.wasm.exports.move_player(4,move_speed);
         }
         if (this.keys[5]){
-            this.wasm.exports.move_player(5);
+            this.wasm.exports.move_player(5,move_speed);
         }
     }
 

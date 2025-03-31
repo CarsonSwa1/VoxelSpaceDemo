@@ -12,8 +12,8 @@ const map_canvas_ctx = map_canvas.getContext("2d");
 const gm = new GameManager(ctx,map_canvas_ctx);
 const maps = new Maps(4,setMapCanvas);
 
-const colorMapPath = "../assets/C2W.png";
-const depthMapPath = "../assets/D2.png";
+const colorMapPath = "../assets/C1W.png";
+const depthMapPath = "../assets/D1.png";
 
 //WASM variables
 let exports, memory, wasm_data;
