@@ -1,3 +1,4 @@
 web-components/tests/
 wasm/test/
 .vscode/
+makefile

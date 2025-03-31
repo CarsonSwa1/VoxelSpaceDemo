@@ -19,12 +19,13 @@ export default class Maps{
         DEPTH: 1,
     }
     
-    constructor(depth=4){
+    constructor(depth=4,setHtmlCanvasMap){
         this.map = null;
         this.width = 0;
         this.height = 0;
         this.depth = depth;
         this.wasm = {exports: null, memory: null, wasm_data: null}
+        this.setHtmlCanvasMap = setHtmlCanvasMap;
     }
 
     setWasm(exports, memory, wasm_data){
@@ -79,6 +80,7 @@ export default class Maps{
     makeMap(width,height){
         this.width = width;
         this.height = height;
+        this.setHtmlCanvasMap(this.width,this.height);
         const arrLen = this.width * this.height * this.depth;
         const byteOffset = this.wasm.exports.wasmmalloc(arrLen);
         const map = new Uint8ClampedArray(this.wasm.memory.buffer,byteOffset,arrLen);

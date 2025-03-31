@@ -6,11 +6,14 @@ const page = document.getElementById("page-container")
 const canvas = document.getElementById("gameScreen");
 const ctx = canvas.getContext("2d");
 
-const gm = new GameManager(ctx);
-const maps = new Maps(4);
+const map_canvas = document.getElementById("game-map");
+const map_canvas_ctx = map_canvas.getContext("2d");
 
-const colorMapPath = "../assets/C1W.png";
-const depthMapPath = "../assets/D1.png";
+const gm = new GameManager(ctx,map_canvas_ctx);
+const maps = new Maps(4,setMapCanvas);
+
+const colorMapPath = "../assets/C2W.png";
+const depthMapPath = "../assets/D2.png";
 
 //WASM variables
 let exports, memory, wasm_data;
@@ -21,37 +24,22 @@ document.addEventListener("DOMContentLoaded",async function load(){
     wasm_data = new Set();
     exports = await loadWasm("../wasm/render.wasm",memory,wasm_data);
 
+    //load canvas buffer into wasm
+    setCanvas();
+    gm.setWasm(exports, memory, wasm_data);
+    gm.loadCanvasBufIntoWasm();
+
     //load map into wasm
     maps.setWasm(exports,memory,wasm_data);
     await maps.loadMap(colorMapPath,Maps.MAP_TYPES.COLOR);
     await maps.loadMap(depthMapPath,Maps.MAP_TYPES.DEPTH);
 
-    //load canvas buffer into wasm
-    setCanvas();
-    gm.setWasm(exports, memory, wasm_data);
-    gm.loadCanvasBufIntoWasm();
-    gm.render();
+    //load map canvas into wasm
+    gm.loadMapCanvasBufIntoWasm();
 
     //set up event listeners and gameloop
     gm.setEventListeners();
     gm.setIntervals();
-
-    // wasmBytes = await loadWasmFile("../wasm/render.wasm")
-    // gm.wasm = initWasm(wasmBytes, 4);
-    
-    /*
-    maps.wasm = gm.wasm;
-    await maps.loadMap(colorMapPath,Maps.MAP_TYPES.COLOR);
-    await maps.loadMap(depthMapPath,Maps.MAP_TYPES.DEPTH);
-    console.log(maps.map);
-    console.log(gm.wasm.exports.get_pages())
-
-    setCanvas();
-    gm.loadCanvasBufIntoWasm();
-
-    gm.setEventListeners();
-    gm.setIntervals();
-    */
 })
 
 function wait(milliseconds) {
@@ -60,8 +48,10 @@ function wait(milliseconds) {
 
 window.addEventListener("resize",() => {
     setCanvas();
+    setMapCanvas();
     gm.canvasResize();
-    gm.render();
+    gm.mapCanvasResize();
+    //gm.render();
 })
 
 
@@ -75,6 +65,21 @@ function setCanvas(){
     page.style.setProperty("--game-canvas-height",canvas.height + "px");
     page.style.setProperty("--game-canvas-left",left + "px");
     page.style.setProperty("--game-canvas-top",top + "px");
+}
+
+function setMapCanvas(width = map_canvas.width, height = map_canvas.height){
+    const rect = canvas.getBoundingClientRect();
+    const right = rect.right + window.scrollX;
+    const bottom = rect.bottom + window.scrollY;
+
+    const new_width = (window.innerWidth - right - 20) * .50;
+    const ratio = new_width / width;
+    const new_height = ratio * height;
+    map_canvas.width = new_width;
+    map_canvas.height = new_height;
+
+    page.style.setProperty("--game-map-width",new_width + "px");
+    page.style.setProperty("--game-map-height",new_height + "px");
 }
 
 

@@ -29,14 +29,22 @@ html,body{
 .page-container{
     width: 100vw;
     height: 100vh;
-    /*page global variables*/
+
+    /*page global variables*/    
     --header-height: 10vh;
+    
+    /*game canvas variables*/
     --game-canvas-height: 0px;
     --game-canvas-width: 0px;
     --game-canvas-left: 0px;
     --game-canvas-top: 0px;
     --game-canvas-border: 5px;
+
+    /*game-map variables*/
+    --game-map-height: 0px;
+    --game-map-width: 0px;
 }
+
 
 .header-container{
     width: 100vw;
@@ -63,13 +71,6 @@ html,body{
     border: var(--game-canvas-border) solid black;
 }
 
-.fps{
-    position: absolute;
-    left: calc(var(--game-canvas-left) + var(--game-canvas-width) + (2 * var(--game-canvas-border)) + 10px);
-    top: calc(var(--game-canvas-top) + 10px);
-    color: white;
-}
-
 .controls-container{
     width: 45%; 
     height: 22%; 
@@ -94,6 +95,20 @@ html,body{
                          ". . . l d r";
     justify-content: center;
     align-content: center;
+}
+
+.fps{
+    position: absolute;
+    left: calc(var(--game-canvas-left) + var(--game-canvas-width) + (2 * var(--game-canvas-border)) + 10px);
+    top: calc(var(--game-canvas-top) + 10px);
+    color: white;
+}
+
+.game-map{
+    position: absolute;
+    left: calc(var(--game-canvas-left) + var(--game-canvas-width) + (2 * var(--game-canvas-border)) + 10px);
+    top: calc(var(--game-canvas-top) + var(--game-canvas-height) - var(--game-map-height));
+    border: 5px solid rgb(0, 0, 0);
 }
 
 

@@ -3,16 +3,17 @@ import WasmArray from "../classes/WasmArray.js";
 const fps = document.getElementById("fps-counter");
 
 export default class GameManager{  
-    constructor(ctx){
+    constructor(ctx,map_ctx){
         this.frameRate = (1000/60);
 
         this.keys = new Array(6);
         this.keys.fill(false);
 
         this.ctx = ctx;
-        
-        this.canvasBuf = new ImageData(ctx.canvas.width,ctx.canvas.height);
-        this.wasmBuf = null;
+        this.canvasWasmArray = null;
+
+        this.map_ctx = map_ctx;
+        this.mapCanvasWasmArray = null;
 
         this.wasm = {exports: null, memory: null, wasm_data: null}
     }
@@ -127,38 +128,48 @@ export default class GameManager{
     render(){
         // var performance = window.performance;
         // var t0 = performance.now();
+
+        //render main game canvas
         this.wasm.exports.render_voxel_space();
-        this.ctx.putImageData(this.wasmBuf.data,0,0);
+        this.ctx.putImageData(this.canvasWasmArray.data,0,0);
+
+        //render map canvas
+        this.wasm.exports.render_map();
+        this.map_ctx.putImageData(this.mapCanvasWasmArray.data,0,0);
+
         // var t1 = performance.now();
         // console.log("Call to doWork took " + (t1 - t0) + " milliseconds.")
     }
 
     canvasResize(){
-        const arrSize = this.ctx.canvas.height * this.ctx.canvas.width * 4;
-        this.wasm.wasm_data.delete(this.wasmBuf);
-        //const offset = this.wasm.exports.wasmrealloc(this.wasmBuf.offset,arrSize);
-        this.wasm.exports.wasmfree(this.wasmBuf.offset);
-        console.log(this.wasm.memory)
-        console.log(this.wasmBuf.offset);
-        const offset = this.wasm.exports.wasmmalloc(arrSize);
+        this.canvasResizer(this.ctx, this.canvasWasmArray, this.wasm.exports.set_canvas);
+    }
 
+    mapCanvasResize(){
+        this.canvasResizer(this.map_ctx, this.mapCanvasWasmArray, this.wasm.exports.set_map_canvas);
+    }
+
+    //parameters: canvas context and wasmArray to save to
+    canvasResizer(ctx, buf, wasm_set_func){
+        const arrSize = ctx.canvas.height * ctx.canvas.width * 4;
+        this.wasm.wasm_data.delete(buf);
+        this.wasm.exports.wasmfree(buf.offset);
+        const offset = this.wasm.exports.wasmmalloc(arrSize);
         if (offset == 0)
             throw new Error("Not Enough Wasm Memory, increase max memory size")
         
-
         const data = new Uint8ClampedArray(this.wasm.memory.buffer,offset,arrSize);
         const canvasBuf = new ImageData(
             data,
-            this.ctx.canvas.width,
-            this.ctx.canvas.height,
+            ctx.canvas.width,
+            ctx.canvas.height,
         );
-        this.wasmBuf.data = canvasBuf;
-        this.wasmBuf.offset = offset;
-        this.wasmBuf.length = arrSize;
-        this.wasm.wasm_data.add(this.wasmBuf); 
+        buf.data = canvasBuf;
+        buf.offset = offset;
+        buf.length = arrSize;
+        this.wasm.wasm_data.add(buf); 
         
-
-        this.wasm.exports.set_canvas(this.ctx.canvas.width,this.ctx.canvas.height,4,offset);
+        wasm_set_func(ctx.canvas.width,ctx.canvas.height,4,offset);
     }
 
     setWasm(exports, memory, wasm_data){
@@ -167,8 +178,23 @@ export default class GameManager{
         this.wasm.wasm_data = wasm_data;
     }
 
+
     loadCanvasBufIntoWasm(){
-        const arrSize = this.ctx.canvas.height * this.ctx.canvas.width * 4;
+        const [canvasBuf,offset,length] = this.makeWasmImageData(this.ctx);
+        this.canvasWasmArray = new WasmArray(canvasBuf,offset,length,true);
+        this.wasm.wasm_data.add(this.canvasWasmArray);
+        this.wasm.exports.set_canvas(this.ctx.canvas.width,this.ctx.canvas.height,4,offset);
+    }
+
+    loadMapCanvasBufIntoWasm(){
+        const [canvasBuf,offset,length] = this.makeWasmImageData(this.map_ctx);
+        this.mapCanvasWasmArray = new WasmArray(canvasBuf,offset,length,true);
+        this.wasm.wasm_data.add(this.mapCanvasWasmArray);
+        this.wasm.exports.set_map_canvas(this.map_ctx.canvas.width,this.map_ctx.canvas.height,4,offset);
+    }
+
+    makeWasmImageData(ctx){
+        const arrSize = ctx.canvas.height * ctx.canvas.width * 4;
         const offset = this.wasm.exports.wasmmalloc(arrSize);
         if (offset == 0)
             throw new Error("Not Enough Wasm Memory, increase max memory size")
@@ -176,12 +202,10 @@ export default class GameManager{
         const data = new Uint8ClampedArray(this.wasm.memory.buffer,offset,arrSize);
         const canvasBuf = new ImageData(
             data,
-            this.ctx.canvas.width,
-            this.ctx.canvas.height,
+            ctx.canvas.width,
+            ctx.canvas.height,
         );
-        this.wasmBuf = new WasmArray(canvasBuf,offset,arrSize,true);
-        this.wasm.wasm_data.add(this.wasmBuf);
-        this.wasm.exports.set_canvas(this.ctx.canvas.width,this.ctx.canvas.height,4,offset);
+        return [canvasBuf,offset,arrSize];
     }
     
 }

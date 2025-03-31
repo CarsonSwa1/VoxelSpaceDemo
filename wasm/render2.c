@@ -17,6 +17,7 @@ void addToCanvasPixelInt(int x, int y,int val);
 int get_canvas_color(int x, int y);
 void plotLine(int x0,int y0,int x1,int y1, int color);
 void fillRectCanvas(int x,int y,int w,int h, int color);
+void fillRectMapCanvas(int x,int y,int w,int h, int color);
 int wrap(int num, int modul);
 void console_log(char* str);
 float js_sin(float angle);
@@ -53,6 +54,12 @@ uint8_t* map;
 int map_width = 0;
 int map_height = 0;
 int map_depth = 0;
+
+//Map Canvas Variables
+uint8_t* map_canvas;
+int map_canvas_width = 0;
+int map_canvas_height = 0;
+int map_canvas_depth = 0;
 
 //setter functions
 void EMSCRIPTEN_KEEPALIVE setPlayerHeight(float height){
@@ -122,6 +129,13 @@ void EMSCRIPTEN_KEEPALIVE set_canvas(int width, int height, int depth,int ptr){
     // char buf[50];
     // sprintf(buf, "Hello World! %d\n", 123);
     // console_log(buf);
+}
+
+void EMSCRIPTEN_KEEPALIVE set_map_canvas(int width, int height, int depth, int ptr){
+    map_canvas_width = width;
+    map_canvas_height = height;
+    map_canvas_depth = depth;
+    map_canvas = (uint8_t*)ptr;
 }
 
 void EMSCRIPTEN_KEEPALIVE render(){
@@ -207,6 +221,32 @@ void EMSCRIPTEN_KEEPALIVE render_voxel_space(){
     //convertCanvasToBoxFilterBlur();
     //convertCanvasToAtkinsonDither();
     //convertCanvasToGrayScale();
+}
+
+void EMSCRIPTEN_KEEPALIVE render_map(){
+    float x_ratio = (float)map_width / (float)map_canvas_width;
+    float y_ratio = (float)map_height / (float)map_canvas_height;
+    
+    float map_y = 0;
+    for (int y = 0; y < map_canvas_height;y++){
+        float map_x = 0;
+        for(int x = 0; x < map_canvas_width; x++){
+            int cmap_idx = (y * map_canvas_width + x) * 4;
+            int map_idx = (floor(map_y) * map_width + floor(map_x)) * 4;
+            *(int*)(map_canvas + cmap_idx) = 0xFF000000 | *(int*)(map + map_idx);
+            map_x += x_ratio;
+        }
+        map_y += y_ratio;
+    }
+
+    int player_x0 = floor(px / x_ratio);
+    int player_y0 = floor(py / y_ratio);
+    int player_x1 = floor((px + pdx * 30) / x_ratio);
+    int player_y1 = floor((py + pdy * 30) / y_ratio);
+    fillRectMapCanvas(player_x0-5,player_y0+5,10,10,0xAFF0FFFF);
+    plotLine(player_x0, player_y0, player_x1, player_y1, 0xAFF0FFFF);
+
+
 }
 
 void convertCanvasToGrayScale(){
@@ -301,6 +341,15 @@ void fillRectCanvas(int x,int y,int w,int h, int color){
     }
 }   
 
+void fillRectMapCanvas(int x,int y,int w,int h, int color){
+    for (int dx = 0; dx < w; dx++){
+        for(int dy = 0; dy < h;dy++){
+            int idx = (wrap(y-dy,map_canvas_height) * map_canvas_width + wrap(x + dx,map_canvas_width)) * 4;
+            *((int*)(map_canvas + idx)) = color;
+        }
+    }
+}
+
 int wrap(int num, int modul){
     int res = num % modul;
     if (num < 0)
@@ -315,8 +364,8 @@ void plotLine(int x0,int y0,int x1,int y1, int color){
     int sy = (y0 < y1) ? 1 : -1;
     int error = dx + dy;
     while (1==1){
-        int idx = (y0 * canvas_width * canvas_depth + x0 * canvas_depth) >> 2;
-        ((int*)canvas)[idx] = color;
+        int idx = (wrap(y0,map_canvas_height) * map_canvas_width + wrap(x0,map_canvas_width)) * map_canvas_depth  >> 2;
+        ((int*)map_canvas)[idx] = color;
         int e2 = 2 * error;
         if (e2 >= dy){
             if (x0 == x1)
