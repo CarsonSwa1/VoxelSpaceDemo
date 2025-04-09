@@ -30,7 +30,6 @@ int render_distance = 150;
 float vision_field = 0.785398; //45 degress in radians
 float tan_half_vision_field = 0.41421356237; //tangent of 22.5 degrees (used in rendering)
 float player_speed = 1.0;
-float player_height = 150.0;
 float horizon = 255.0;
 float scale_height = 200.0;
 float rotation_speed = 0.05;
@@ -42,6 +41,7 @@ float py = 50;
 float pa = PI_OVER_TWO;
 float pdx = 0.0;
 float pdy = 1.0;
+float player_height = 150.0;
 
 
 //Canvas Variables 
@@ -114,6 +114,11 @@ void EMSCRIPTEN_KEEPALIVE move_player(uint8_t keyCode, float p_speed){
             player_height -= p_speed;
             break;
     }
+
+    pa = (pa >= 0) ? fmodf(pa,TWO_PI) : (fmodf(pa,TWO_PI) + TWO_PI);
+    px = (px >= 0) ? fmodf(px, map_width) : (fmodf(px,map_width) + map_width);
+    py = (py >= 0) ? fmodf(py, map_height) : (fmodf(py, map_height) + map_height);
+    player_height = fmaxf(player_height, 0.0);
 }
 
 void EMSCRIPTEN_KEEPALIVE set_img(int width, int height, int depth, int ptr){
@@ -352,7 +357,7 @@ void fillRectMapCanvas(int x,int y,int w,int h, int color){
 
 inline int wrap(int num, int modul){
     int res = num % modul;
-    if (num < 0)
+    if (res < 0)
         res += modul;
     return res;
 }

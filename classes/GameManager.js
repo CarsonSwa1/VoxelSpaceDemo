@@ -106,15 +106,13 @@ export default class GameManager{
     }
 
     setIntervals(){
-        // this.gameLoop = window.setInterval(() => {
-        //     this.movePlayer();
-        //     this.render();
-        // },this.frameRate)
+        const frames_per_second = 1000/60;
         let prev_time = 0;
         let prev_frame = 0;
-        let ticks = 0;
+        let ticks = 0
         this.draw = () => {
             requestAnimationFrame(this.draw);
+
             const now = performance.now();
             if (prev_frame != 0)
                 this.movePlayer(now - prev_frame);

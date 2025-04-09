@@ -72,10 +72,16 @@ html,body{
 }
 
 .controls-container{
+    margin-left: 0px;
     width: 45%; 
     height: 22%; 
     background-color: gray;
     border-radius: 20px;
+    transition: margin-left 1s;
+}
+
+.uncenter{
+    margin-left: 15.5%;
 }
 
 .controls-grid{

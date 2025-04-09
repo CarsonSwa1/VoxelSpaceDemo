@@ -1,3 +1,5 @@
+const key_panel = document.getElementById("controls-container")
+
 class SettingsPage extends HTMLElement{
     static observedAttributes = [];
     constructor(){
@@ -11,7 +13,7 @@ class SettingsPage extends HTMLElement{
         const template = document.createElement("template");
         template.innerHTML = `
             <button class="settings-drop-down-button" id="settings-button">Settings</button>
-            <div class="settings-page hidden" id="settings-page">
+            <div class="settings-page visible" id="settings-page">
                 <div class="settings-sub-group-container">
                     <div class="settings-title">
                         Game Settings
@@ -27,7 +29,7 @@ class SettingsPage extends HTMLElement{
                     
                     <div class="settings-input">
                         <div class="flex-center" style="width: 100%; height: 100%">
-                            <div class="input-title">Player Rotate Speed:</div>
+                            <div class="input-title">Player Rotation Speed:</div>
                         </div>
                         <div class="flex-center" style="width: 100%; height: 100%">
                             <input type="number" min="0" step="0.01" class="input-title" id="input-player-rotate-speed" style="width: 100%;">
@@ -87,16 +89,18 @@ class SettingsPage extends HTMLElement{
         this.settings_button = document.getElementById("settings-button");
         this.settings_page = document.getElementById("settings-page");
         this.distance_input = document.getElementById("distance_input");
-        this.settings_open = false;
+        this.settings_open = true;
 
         this.settings_button.addEventListener("click",() => {
             
             this.settings_open = !this.settings_open;
             if (this.settings_open){
                 this.settings_page.classList.add("visible");
+                key_panel.classList.add("uncenter");
             }
             else{
                 this.settings_page.classList.remove("visible");
+                key_panel.classList.remove("uncenter");
             }
         })
     }
